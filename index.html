@@ -316,3 +316,77 @@
 </script>
 </body>
 </html>
+    const p = Number(document.getElementById("new-price").value);
+    if (!n || !w || !p) { alert("कृपया नाम, वजन और दाम तीनों भरें!"); return; }
+    products.push({ category: c, name: n, weight: w, price: p });
+    document.getElementById("new-name").value = ""; document.getElementById("new-weight").value = ""; document.getElementById("new-price").value = "";
+    renderAdminRates();
+  }
+  async function saveProductsToGithub() {
+    const token = document.getElementById("gh-token").value.trim();
+    if (!token) { alert("कृपया ऊपर गिटहब की गुप्त चाबी (ghp_...) पेस्ट करें!"); return; }
+    localStorage.setItem("n1_gh_token", token);
+    const btn = document.getElementById("save-live-btn");
+    btn.innerText = "⏳ सेव हो रहा है...";
+    const apiUrl = `https://github.com{GH_USER}/${GH_REPO}/contents/products.json`;
+    try {
+      let sha = null;
+      const getRes = await fetch(apiUrl, { headers: { Authorization: `token ${token}` } });
+      if (getRes.ok) { const fileData = await getRes.json(); sha = fileData.sha; }
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2))));
+      const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "Update rates", content, sha })
+      });
+      if (putRes.ok) {
+        alert("🎉 बधाई हो! नए रेट सीधे वेबसाइट पर सेव हो गए हैं। 30 सेकंड में सभी ग्राहकों को नए रेट दिखने लगेंगे!");
+        closeModal("admin-modal");
+        init();
+      } else {
+        alert("टोकन गलत है या अनुमति नहीं है। कृपया सही ghp_ टोकन जांचें।");
+      }
+    } catch (e) { alert("नेटवर्क की समस्या हुई, कृपया दोबारा दबाएं।"); }
+    btn.innerText = "🚀 सीधे वेबसाइट पर लाइव सेव करें";
+  }
+  async function loadAdminOrders() {
+    const box = document.getElementById("admin-orders-list");
+    box.innerHTML = "ऑर्डर लोड हो रहे हैं...";
+    try {
+      const res = await fetch(`orders.json?t=${Date.now()}`);
+      allOrders = res.ok ? await res.json() : JSON.parse(localStorage.getItem("n1_orders") || "[]");
+    } catch (e) { allOrders = JSON.parse(localStorage.getItem("n1_orders") || "[]"); }
+    box.innerHTML = allOrders.length === 0 ? "<p>अभी तक कोई ऑर्डर नहीं आया है।</p>" : allOrders.map((o, i) => `
+      <div class="status-card">
+        <b>#${o.id} - ${o.name} (${o.phone})</b><br>
+        <small>${o.address}</small>
+        <div style="font-size:12px; margin:6px 0; white-space:pre-line;">${o.items}</div>
+        <b>कुल बिल: ₹${o.total}</b> | स्टेटस: <b>${o.status}</b><br><br>
+        ${o.status !== 'Accepted' ? `<button class="wa-submit" style="padding:8px;" onclick="acceptCustomerOrder(${i})">✅ ऑर्डर Accept करें</button>` : '<span class="badge-accepted">✅ Accepted हो चुका है</span>'}
+      </div>`).join("");
+  }
+  async function acceptCustomerOrder(idx) {
+    const token = document.getElementById("gh-token").value.trim() || localStorage.getItem("n1_gh_token");
+    if (!token) { alert("कृपया पहले ऊपर गिटहब टोकन (ghp_...) डालें!"); return; }
+    allOrders[idx].status = "Accepted";
+    const apiUrl = `https://github.com{GH_USER}/${GH_REPO}/contents/orders.json`;
+    try {
+      let sha = null;
+      const getRes = await fetch(apiUrl, { headers: { Authorization: `token ${token}` } });
+      if (getRes.ok) { const fileData = await getRes.json(); sha = fileData.sha; }
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(allOrders, null, 2))));
+      const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "Accept order", content, sha })
+      });
+      if (putRes.ok) {
+        alert("✅ ऑर्डर Accept हो गया! अब ग्राहक को भी वेबसाइट पर Accepted दिखेगा।");
+        loadAdminOrders();
+      }
+    } catch (e) { alert("सेव करने में त्रुटि हुई।"); }
+  }
+  init();
+</script>
+</body>
+</html>
