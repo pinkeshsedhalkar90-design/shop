@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N.I INDIAN LIGHT</title>
+<style>
+*{box-sizing:border-box;font-family:sans-serif;margin:0;padding:0}
+body{background:#f4f4f9;color:#222;padding-bottom:130px}
+header{background:#e65100;color:#fff;padding:15px;text-align:center;position:relative}
+.adm-btn{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.25);color:#fff;border:1px solid #fff;padding:4px 8px;border-radius:6px;font-size:11px}
+.badge{background:#138808;font-size:11px;padding:3px 10px;border-radius:15px;display:inline-block;margin-top:5px}
+.warn{background:#fff3cd;color:#856404;text-align:center;font-size:12px;padding:5px;font-weight:bold}
+.top-bar{position:sticky;top:0;background:#fff;padding:8px;box-shadow:0 2px 5px rgba(0,0,0,.1);z-index:10}
+.search{width:100%;padding:9px 14px;border:1.5px solid #e65100;border-radius:20px;font-size:14px;margin-bottom:8px}
+.tabs{display:flex;overflow-x:auto;gap:6px;scrollbar-width:none}
+.tab{padding:6px 12px;background:#eee;border-radius:15px;font-size:12px;font-weight:bold;white-space:nowrap;border:none}
+.tab.active{background:#e65100;color:#fff}
+.box{padding:10px;max-width:600px;margin:auto}
+.card{background:#fff;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;gap:10px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.pimg{width:68px;height:68px;border-radius:8px;object-fit:cover;background:#fff3e0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:1px solid #eee}
+.cat{font-size:10px;color:#e65100;font-weight:bold}
+.title{font-size:14px;font-weight:bold;margin:2px 0}
+.price{font-size:16px;font-weight:bold;color:#138808}
+.qbox{display:flex;align-items:center;border:1px solid #ddd;border-radius:6px;overflow:hidden;flex-shrink:0}
+.qbtn{background:#e65100;color:#fff;border:none;width:30px;height:30px;font-size:18px;font-weight:bold}
+.qval{width:28px;text-align:center;font-weight:bold;font-size:14px}
+.form{background:#fff;border-radius:10px;padding:14px;margin-top:12px;box-shadow:0 1px 5px rgba(0,0,0,.1)}
+.form input,.form textarea{width:100%;padding:9px;border:1px solid #ccc;border-radius:6px;margin:5px 0 10px 0;font-size:14px}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:bold;margin-top:8px}
+.btn:disabled{background:#bbb}
+.bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px 15px;box-shadow:0 -3px 10px rgba(0,0,0,.12);z-index:20}
+.row{display:flex;justify-content:space-between;align-items:center}
+#admBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:99;overflow-y:auto;padding:12px}
+.adm-in{background:#fff;border-radius:10px;padding:14px;max-width:500px;margin:auto}
+.arow{border-bottom:1px solid #eee;padding:8px 0}
+.pbtn{background:#0277bd;color:#fff;padding:6px 10px;border-radius:5px;font-size:12px;display:inline-block;cursor:pointer;font-weight:bold}
+</style>
+</head>
+<body>
+
+<header>
+  <button class="adm-btn" onclick="openAdm()">⚙️ रेट/फोटो बदलें</button>
+  <h1>N.I INDIAN LIGHT</h1>
+  <div class="badge">🇮🇳 100% Made in India - Pure Copper Wire</div>
+</header>
+<div class="warn">⚠️ केवल Prepaid ऑर्डर स्वीकार हैं (No COD)</div>
+
+<div class="top-bar">
+  <input class="search" id="searchBox" placeholder="🔍 लाइट या आइटम का नाम लिखकर खोजें..." oninput="showItems()">
+  <div class="tabs" id="catTabs"></div>
+</div>
+
+<div class="box">
+  <div id="list"></div>
+
+  <div class="form" id="orderForm">
+    <h3>📦 डिलीवरी पता और पेमेंट</h3>
+    <input type="number" id="pin" placeholder="6 अंकों का पिनकोड डालें *" oninput="checkPin()">
+    <div id="pinMsg" style="font-size:12px;font-weight:bold;margin-bottom:8px"></div>
+    <input type="text" id="name" placeholder="पूरा नाम *">
+    <input type="tel" id="phone" placeholder="मोबाइल नंबर *">
+    <textarea id="addr" rows="2" placeholder="पूरा पता (मकान नं, शहर, जिला, राज्य) *"></textarea>
+    <button class="btn" id="upiBtn" style="background:#5f259f" onclick="payUPI()" disabled>💳 Pay ₹<span id="payAmt">0</span> via UPI</button>
+    <button class="btn" id="waBtn" style="background:#25D366" onclick="sendWA()" disabled>✅ ऑर्डर कन्फर्म करें (WhatsApp)</button>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="row" style="font-size:12px;color:#555;margin-bottom:4px">
+    <span>सामान: <b>₹<span id="sub">0</span></b></span>
+    <span>कूरियर चार्ज: <b>₹<span id="ship">0</span></b></span>
+  </div>
+  <div class="row">
+    <b style="font-size:17px">कुल बिल: ₹<span id="tot">0</span> (<span id="qty">0</span> पीस)</b>
+    <button id="goBtn" style="background:#e65100;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:bold" onclick="document.getElementById('orderForm').scrollIntoView()" disabled>पता भरें ›</button>
+  </div>
+</div>
+
+<div id="admBox">
+  <div class="adm-in">
+    <div class="row" style="margin-bottom:10px"><h3>⚙️ रेट और फोटो बदलें</h3><button onclick="document.getElementById('admBox').style.display='none'" style="padding:4px 10px">✕ बंद</button></div>
+    <div id="admList"></div>
+    <div style="margin-top:10px;border-top:1px solid #ddd;padding-top:8px">
+      <b>+ नया आइटम जोड़ें:</b>
+      <input id="nCat" placeholder="कैटेगरी (जैसे: Handmade Copper)" style="width:100%;padding:7px;margin:4px 0">
+      <input id="nName" placeholder="लाइट का नाम" style="width:100%;padding:7px;margin:4px 0">
+      <input id="nPrice" type="number" placeholder="कीमत ₹ में" style="width:100%;padding:7px;margin:4px 0">
+      <label class="pbtn" style="width:100%;text-align:center;margin:4px 0">📷 गैलरी से फोटो चुनें <input type="file" accept="image/*" hidden onchange="pickNewImg(this)"></label>
+      <div id="newImgOk" style="font-size:11px;color:green;font-weight:bold"></div>
+      <button onclick="addItem()" style="background:#138808;color:#fff;border:none;width:100%;padding:9px;border-radius:6px;font-weight:bold;margin-top:4px">+ लिस्ट में जोड़ें</button>
+    </div>
+    <button onclick="saveAll()" style="background:#e65100;color:#fff;border:none;width:100%;padding:11px;border-radius:6px;font-weight:bold;margin-top:12px">💾 Save & Update All Customers</button>
+  </div>
+</div>
+
+<script>
+const UPI = "8103878749@ybl", WA = "918103878749", PASS = "1234";
+
+// ITEMS_START
+let items = [
+  {id:1, cat:"Handmade Copper", name:"RGB कॉपर झालर (10 मीटर)", price:160, w:250, img:""},
+  {id:2, cat:"Handmade Copper", name:"मल्टी कलर कॉपर झालर (15 मीटर)", price:220, w:350, img:""},
+  {id:3, cat:"Handmade Copper", name:"सिंगल कलर वर्म व्हाइट कॉपर झालर", price:140, w:200, img:""},
+  {id:4, cat:"Readymade Indian", name:"इंडियन डिस्को LED झालर (12 मीटर)", price:190, w:300, img:""},
+  {id:5, cat:"Raw Material", name:"पूरी कॉपर वायर बंडल (100 मीटर)", price:450, w:1000, img:""},
+  {id:6, cat:"Raw Material", name:"RGB LED बल्ब पैकेट (100 पीस)", price:180, w:150, img:""},
+  {id:7, cat:"Raw Material", name:"झालर कंट्रोलर डिब्बी (10 पीस)", price:150, w:200, img:""}
+];
+// ITEMS_END
+
+let cart = {}, activeCat = "All", pinOk = false, city = "", grand = 0, tempImg = "";
+
+function makeTabs(){
+  const cats = ["All", ...new Set(items.map(i => i.cat))];
+  document.getElementById("catTabs").innerHTML = cats.map(c => 
+    `<button class="tab ${activeCat===c?'active':''}" onclick="setCat('${c}')">${c==='All'?'सभी आइटम':c}</button>`
+  ).join("");
+}
+
+function setCat(c){ activeCat = c; makeTabs(); showItems(); }
+
+function showItems(){
+  const q = document.getElementById("searchBox").value.trim().toLowerCase();
+  if(q) activeCat = "All";
+  const filtered = items.filter(i => (activeCat==="All" || i.cat===activeCat) && (i.name.toLowerCase().includes(q) || i.cat.toLowerCase().includes(q)));
+  document.getElementById("list").innerHTML = filtered.length ? filtered.map(i => `
+    <div class="card">
+      ${i.img ? `<img src="${i.img}" class="pimg">` : `<div class="pimg">💡</div>`}
+      <div style="flex:1"><div class="cat">${i.cat}</div><div class="title">${i.name}</div><div class="price">₹${i.price}</div></div>
+      <div class="qbox">
+        <button class="qbtn" onclick="chg(${i.id},-1)">-</button>
+        <div class="qval">${cart[i.id]||0}</div>
+        <button class="qbtn" onclick="chg(${i.id},1)">+</button>
+      </div>
+    </div>`).join("") : "<p style='text-align:center;padding:20px'>कोई आइटम नहीं मिला</p>";
+}
+
+function chg(id, d){
+  cart[id] = (cart[id]||0) + d;
+  if(cart[id]<=0) delete cart[id];
+  showItems(); calc();
+}
+
+function calc(){
+  let s = 0, w = 0, q = 0;
+  items.forEach(i => { if(cart[i.id]){ s += i.price*cart[i.id]; w += (i.w||250)*cart[i.id]; q += cart[i.id]; }});
+  let sh = w > 0 ? Math.ceil(w/500)*60 : 0;
+  grand = s + sh;
+  document.getElementById("sub").innerText = s;
+  document.getElementById("ship").innerText = sh;
+  document.getElementById("tot").innerText = grand;
+  document.getElementById("payAmt").innerText = grand;
+  document.getElementById("qty").innerText = q;
+  document.getElementById("goBtn").disabled = q===0;
+  document.getElementById("upiBtn").disabled = !(pinOk && grand>0);
+  document.getElementById("waBtn").disabled = !(pinOk && grand>0);
+}
+
+async function checkPin(){
+  const p = document.getElementById("pin").value.trim();
+  const m = document.getElementById("pinMsg");
+  pinOk = false; calc();
+  if(p.length !== 6){ m.style.color="#666"; m.innerText="6 अंकों का पिनकोड डालें"; return; }
+  m.style.color="#e65100"; m.innerText="⏳ कूरियर सुविधा चेक हो रही है...";
+  try{
+    const r = await (await fetch(`https://postalpincode.in{p}`)).json();
+    if(r && r.Status==="Success" && r.PostOffice){
+      city = `${r.PostOffice.District}, ${r.PostOffice.State}`;
+      pinOk = true; m.style.color="#138808"; m.innerText=`✅ डिलीवरी उपलब्ध है (${city})`;
+    } else { m.style.color="red"; m.innerText="❌ इस पिनकोड पर कूरियर सुविधा नहीं है"; }
+  } catch(e){ pinOk = true; city="भारत"; m.style.color="#138808"; m.innerText="✅ डिलीवरी उपलब्ध है"; }
+  calc();
+}
+
+function valid(){
+    const n = document.getElementById("name").value.trim(), ph = document.getElementById("phone").value.trim(), ad = document.getElementById("addr").value.trim();
+  if(!pinOk || !n || ph.length<10 || !ad){ alert("कृपया सही पिनकोड, नाम, 10 अंकों का नंबर और पूरा पता भरें!"); return false; }
+  return true;
+}
+
+function payUPI(){
+  if(valid()) location.href = `upi://pay?pa=${UPI}&pn=NI%20INDIAN%20LIGHT&am=${grand}&cu=INR`;
+}
+
+function sendWA(){
+  if(!valid()) return;
+  let txt = `*🛒 नया PREPAID ऑर्डर - N.I INDIAN LIGHT*\nनाम: ${document.getElementById("name").value}\nमोबाइल: ${document.getElementById("phone").value}\nपिनकोड: ${document.getElementById("pin").value} (${city})\nपता: ${document.getElementById("addr").value}\n---\n`;
+  items.forEach(i => { if(cart[i.id]) txt += `• ${i.name} x ${cart[i.id]} = ₹${i.price*cart[i.id]}\n`; });
+  txt += `---\nसामान: ₹${document.getElementById("sub").innerText}\nकूरियर चार्ज: ₹${document.getElementById("ship").innerText}\n*कुल बिल: ₹${grand}*`;
+  window.open(`https://wa.me{WA}?text=${encodeURIComponent(txt)}`, "_blank");
+}
+
+function shrinkImg(file, cb){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = 160; c.height = 160;
+      c.getContext("2d").drawImage(img, 0, 0, 160, 160);
+      cb(c.toDataURL("image/jpeg", 0.7));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function pickImg(idx, inp){
+  if(inp.files) shrinkImg(inp.files, data => { items[idx].img = data; renderAdm(); showItems(); });
+}
+
+function pickNewImg(inp){
+  if(inp.files) shrinkImg(inp.files, data => { tempImg = data; document.getElementById("newImgOk").innerText = "✅ फोटो चुन ली गई है!"; });
+}
+
+function openAdm(){
+  if(prompt("एडमिन पासवर्ड डालें (1234):") !== PASS) return;
+  renderAdm(); document.getElementById("admBox").style.display = "block";
+}
+function renderAdm(){
+  document.getElementById("admList").innerHTML = items.map((i,idx) => `
+    <div class="arow">
+      <div style="font-size:12px;font-weight:bold;margin-bottom:4px">${i.name}</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="number" value="${i.price}" style="width:70px;padding:5px;border:1px solid #ccc;border-radius:4px" onchange="items[${idx}].price=+this.value;showItems();calc()">
+        <label class="pbtn">📷 फोटो बदलें <input type="file" accept="image/*" hidden onchange="pickImg(${idx}, this)"></label>
+        <button onclick="items.splice(${idx},1);renderAdm();makeTabs();showItems();calc()" style="background:red;color:#fff;border:none;padding:6px 9px;border-radius:4px">X</button>
+      </div>
+    </div>`).join("");
+}
+function addItem(){
+  const c = document.getElementById("nCat").value.trim(), n = document.getElementById("nName").value.trim(), p = +document.getElementById("nPrice").value;
+  if(!c || !n || !p) return alert("कैटेगरी, नाम और कीमत भरें!");
+  items.push({id:Date.now(), cat:c, name:n, price:p, w:250, img:tempImg});
+  tempImg=""; document.getElementById("nName").value=""; document.getElementById("nPrice").value=""; document.getElementById("newImgOk").innerText="";
+  renderAdm(); makeTabs(); showItems();
+}
+function saveAll(){
+  const txt = "// ITEMS_START\nlet items = " + JSON.stringify(items) + ";\n// ITEMS_END";
+  navigator.clipboard.writeText(txt);
+  alert("✅ नया रेट और फोटो कॉपी हो गया! अब खुलने वाले GitHub पेज में पुरानी 'let items = [...]' लाइन की जगह इसे पेस्ट करके Commit changes दबा दें।");
+  window.open("https://github.com", "_blank");
+}
+
+makeTabs(); showItems();
+</script>
+</body>
+</html>
