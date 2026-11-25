@@ -1,0 +1,15 @@
+{
+  "name": "N.1 INDIAN LIGHT",
+  "short_name": "N.1 Light",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6b00",
+  "icons": [
+    {
+      "src": "https://flaticon.com",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
